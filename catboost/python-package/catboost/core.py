@@ -2564,6 +2564,8 @@ def _is_data_single_object(data):
             "Invalid data type={} : must be list, numpy.ndarray, pandas.Series, pandas.DataFrame, polars.Series, polars.DataFrame"
             " scipy.sparse matrix, catboost.FeaturesData or catboost.Pool".format(type(data))
         )
+    if isinstance(data, list):
+        data = np.asarray(data, dtype=object)
     return len(np.shape(data)) == 1
 
 

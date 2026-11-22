@@ -10465,6 +10465,26 @@ def test_embeddings_train(boosting_type, columns):
     return [local_canonical_file(learn_error_path), local_canonical_file(test_error_path)]
 
 
+def test_predict_list_with_embedding_features():
+    data = [
+        [[0.1, 0.12, 0.33], [1.0, 0.7], 2, "male"],
+        [[0.0, 0.8, 0.2], [1.1, 0.2], 1, "female"],
+        [[0.2, 0.31, 0.1], [0.3, 0.11], 2, "female"],
+        [[0.01, 0.2, 0.9], [0.62, 0.12], 1, "male"],
+    ]
+    model = catboost.CatBoostClassifier(
+        iterations=2, depth=2, thread_count=1, verbose=False, allow_writing_files=False
+    )
+    model.fit(data, [1, 0, 0, 1], cat_features=[3], embedding_features=[0, 1])
+    pool = catboost.Pool(data, cat_features=[3], embedding_features=[0, 1])
+    expected = model.predict(pool)
+
+    np.testing.assert_array_equal(model.predict(data), expected)
+    prediction = model.predict(data[1])
+    assert np.isscalar(prediction)
+    assert prediction == expected[1]
+
+
 EMBEDDING_CALCER_OPTIONS = {
     "LDAparam": "LDA:reg=0.05:likelihood=true",
     "KNNparam": "KNN:k=20",
